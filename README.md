@@ -193,13 +193,13 @@ server {
     # -------------------------
     # WebSocket 支援
     # -------------------------
-    location /ws/ {
-        proxy_pass http://backend_api;
-        proxy_set_header Host $host;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
-    }
+    # location /ws/ {
+    #     proxy_pass http://backend_api;
+    #     proxy_set_header Host $host;
+    #     proxy_http_version 1.1;
+    #     proxy_set_header Upgrade $http_upgrade;
+    #     proxy_set_header Connection "Upgrade";
+    # }
 }
 ```
 → 前端透過 http://localhost/api
