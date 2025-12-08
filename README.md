@@ -95,6 +95,15 @@ C:\nginx\
     └── error.log
 ```
 
+## 🟥 Windows Nginx 路徑使用注意事項
+### Windows 必須使用 正斜線 / 或雙反斜線：
+✔ `C:/nginx/ssl/server.crt`
+
+✔ `C:\\nginx\\ssl\\server.crt`
+
+✘ `C:\nginx\ssl\server.crt`（會報錯）
+
+
 ## 🟦 各資料夾用途說明
 ## 📁 C:\nginx\conf\nginx.conf
 
@@ -178,16 +187,11 @@ server {
     server_name backend.local;
 
     # 如果後端是 API
-    location /api/ {
+    location / {
         proxy_pass http://127.0.0.1:5000;  # 後端程式端口默認為 5000
-        proxy_http_version 1.1;
-
-        proxy_set_header   Upgrade $http_upgrade;
-        proxy_set_header   Connection keep-alive;
-        proxy_set_header   Host $host;
-        proxy_set_header   X-Real-IP $remote_addr;
-        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 
     # -------------------------
@@ -271,3 +275,60 @@ nssm install MyApiService
 nssm start MyApiService
 ```
 
+---
+
+# 🚀 刪除windows 服務
+## ✅ 方法一：用 sc delete 刪除（最常用）
+1. 開啟 命令提示字元（CMD），使用 系統管理員 執行
+2. 查看服務名稱（不是顯示名稱）
+```sh
+sc query type= service state= all
+```
+找到你要刪除的「ServiceName」
+3. 執行刪除命令：
+```cpp
+sc delete <ServiceName>
+```
+
+範例：
+```cpp
+sc delete MyService
+```
+➡️ 刪除後需 重新開機 才會完全消失。
+
+## ✅ 方法二：使用 PowerShell 刪除
+1. 用 service name：
+```powershell
+Get-Service -Name "MyService" | Remove-Service
+```
+PowerShell 7+ 可直接使用 Remove-Service。
+
+## ✅ 方法三：從註冊表移除（最後手段）
+### ⚠️ 只有當 service 卡住或無法刪除時使用。
+1. Win+R → 輸入：regedit
+2. 進入：
+```sql
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services
+```
+3. 找到你的服務資料夾（ServiceName）
+4. 右鍵 → Delete
+5. 重新開機
+
+## ❗ 常見問題
+Q1：刪除時回應「OpenService FAILED 5: Access is denied」？
+
+原因：CMD 沒用管理員執行
+
+✔ 右鍵「命令提示字元 → 以系統管理員執行」
+
+Q2：刪除後仍然看到服務？
+
+✔ 重開機
+
+✔ 若是 Windows 在保護該服務（例如 Defender、系統服務）→ 無法刪除
+
+Q3：服務刪除後 exe 檔案可以手動刪除嗎？
+
+可以。
+
+服務刪除後不會影響程式檔案，你可到原安裝路徑自行刪除。
